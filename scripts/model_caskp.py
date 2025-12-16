@@ -214,13 +214,13 @@ class AMSFF(nn.Module):
         
         return projected_features
 
-class HyperAttention(nn.Module):
+class DockAttention(nn.Module):
     """
-    HyperAttention Fusion block.
+    DockAttention Fusion block.
     Fuses sequence and structure embeddings using spatial cross-attention.
     """
     def __init__(self, d_model, struct_dim, num_heads=8, dropout=0.1):
-        super(HyperAttention, self).__init__()
+        super(DockAttention, self).__init__()
         self.d_model = d_model
         
         self.spatial_attention = nn.MultiheadAttention(d_model, num_heads, dropout=dropout, batch_first=True)
@@ -236,7 +236,7 @@ class HyperAttention(nn.Module):
 
 class FullKcatPredictor(nn.Module):
     """
-    The CASKP model, integrating ESM-2, AMSFF, HyperAttention, and a regressor.
+    The CASKP model, integrating ESM-2, AMSFF, DockAttention, and a regressor.
     """
     def __init__(self, esm_model_name, struct_dim, d_model=256, d_multiscale=128, num_heads=8, dropout=0.1, use_amsff=True):
         super(FullKcatPredictor, self).__init__()
@@ -248,7 +248,7 @@ class FullKcatPredictor(nn.Module):
         if self.use_amsff:
             self.amsff = AMSFF(d_model, d_multiscale, dropout)
         
-        self.hyper_attention = HyperAttention(d_model, struct_dim, num_heads, dropout)
+        self.hyper_attention = DockAttention(d_model, struct_dim, num_heads, dropout)
         
         self.output_regressor = nn.Sequential(
             nn.Linear(d_model, d_model // 2),
